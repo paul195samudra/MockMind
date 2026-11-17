@@ -1,0 +1,123 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Light Mode Defaults */
+  --color-primary-blue: #2563EB;
+  --color-dark-navy: #0F172A;
+  --color-accent-teal: #14B8A6;
+
+  --color-brand-blue: #2563EB;
+  --color-brand-navy: #0F172A;
+  --color-brand-teal: #14B8A6;
+
+  /* Indigo / Brand Accent Scale */
+  --color-indigo-50: #eff6ff;
+  --color-indigo-100: #dbeafe;
+  --color-indigo-200: #bfdbfe;
+  --color-indigo-500: #3b82f6;
+  --color-indigo-600: #2563EB;
+  --color-indigo-700: #1d4ed8;
+  --color-indigo-800: #1e40af;
+  --color-indigo-900: #1e3a8a;
+  --color-indigo-950: #0F172A;
+}
+
+:root {
+  color-scheme: light;
+  --surface-canvas: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-subtle: #f1f5f9;
+  --border-hairline: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+}
+
+/* Sophisticated Baby Pink & Soft Rose Dark Mode Palette
+   High-legibility neutral-warm text paired with curated rose/pink accents */
+html.dark {
+  color-scheme: dark;
+  --surface-canvas: #12080d;
+  --surface-card: #1b0d14;
+  --surface-subtle: #26131d;
+  --border-hairline: #3b1d2c;
+  --text-primary: #fdf2f8;
+  --text-secondary: #e7c6d7;
+  --text-muted: #b88aa1;
+
+  --color-primary-blue: #f472b6;
+  --color-brand-blue: #f472b6;
+  --color-indigo-50: #2a101d;
+  --color-indigo-100: #3d1629;
+  --color-indigo-200: #59203d;
+  --color-indigo-300: #f9a8d4;
+  --color-indigo-400: #f472b6;
+  --color-indigo-500: #ec4899;
+  --color-indigo-600: #db2777;
+  --color-indigo-700: #f472b6;
+  --color-indigo-800: #fbcfe8;
+  --color-indigo-900: #fdf2f8;
+  --color-indigo-950: #160910;
+}
+
+body {
+  background-color: var(--surface-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark body {
+  letter-spacing: 0.005em;
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(244, 114, 182, 0.28);
+}
+
+/* Tabular numerals helper */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus visible ring */
+:focus-visible {
+  outline: 2px solid var(--color-indigo-500);
+  outline-offset: 2px;
+}
+
+/* Clean Print / PDF export rules for evaluation reports */
+@media print {
+  #app_top_nav,
+  #app_sleek_footer,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+}
+

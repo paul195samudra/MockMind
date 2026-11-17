@@ -1,0 +1,594 @@
+{
+  "questions": [
+    {
+      "id": "react-localstorage",
+      "title": "Implement Custom useLocalStorage Hook",
+      "category": "Data Structures",
+      "type": "coding",
+      "difficulty": "Easy",
+      "description": "Implement a React hook called `useLocalStorage` that allows components to persist state in `localStorage`.\n\nThe hook should accept a `key` (string) and an `initialValue` (any). It must return a state variable and a setter function, similar to standard `useState`.\n\n### Requirements:\n1. Load state from `localStorage` on initialization. If the key is not found, default to `initialValue`.\n2. Handle state updates and write the new value to `localStorage`.\n3. Support functional updates: e.g., `setValue(prev => prev + 1)`.\n4. Wrap operations in `try/catch` block to handle errors gracefully (like locked storage in private windows).",
+      "initialCode": "import { useState, useEffect } from 'react';\n\nexport function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {\n  // Your code here\n  \n}\n",
+      "solutionTemplate": "import { useState, useEffect } from 'react';\n\nexport function useLocalStorage<T>(key: string, initialValue: T) {\n  const [storedValue, setStoredValue] = useState<T>(() => {\n    try {\n      const item = window.localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      console.log(error);\n      return initialValue;\n    }\n  });\n\n  const setValue = (value: T | ((val: T) => T)) => {\n    try {\n      const valueToStore = value instanceof Function ? value(storedValue) : value;\n      setStoredValue(valueToStore);\n      window.localStorage.setItem(key, JSON.stringify(valueToStore));\n    } catch (error) {\n      console.log(error);\n    }\n  };\n\n  return [storedValue, setValue] as const;\n}",
+      "expectedOutcomes": [
+        "Initialize state from localStorage item or initialValue.",
+        "Check for function types in setValue to support functional state modifications.",
+        "Save items using JSON.stringify.",
+        "Gracefully handle locked files or browser storage exceptions in a try-catch block."
+      ],
+      "keywords": [
+        "localStorage",
+        "useState",
+        "JSON.parse",
+        "JSON.stringify",
+        "functional update",
+        "try-catch"
+      ]
+    },
+    {
+      "id": "system-design-tinyurl",
+      "title": "Design a URL Shortener Service (TinyURL)",
+      "category": "System Design",
+      "type": "conceptual",
+      "difficulty": "Medium",
+      "description": "Design a high-scale URL shortener service like TinyURL.\n\nYour answer should mock a standard System Design Interview response. Structure your answer to address:\n1. **Requirements Clarification**: Functional (shortening, redirection, custom links, expiration) vs. Non-functional (highly available, low latency redirection, write scaling).\n2. **Back-of-the-envelope estimation**: Estimate Read/Write QPS and database storage needed over 5 years.\n3. **API Definition**: Create clean RESTful endpoints.\n4. **Database Schema Choice**: Relational vs. NoSQL, and index requirements.\n5. **Key Generation Service (KGS)**: Explain collision prevention, hashing algorithm (Base62 vs. MD5), and pre-generating keys.\n6. **Caching & Load Balancing**: Optimize lookups for viral URLs.",
+      "solutionTemplate": "A comprehensive solution covers:\n- Hashing URLs vs Key Generation Service (highly parallelizable lock-free key-serving to avoid DB write serialization).\n- Core APIs: POST /api/v1/shorten (takes longUrl, returns shortUrl), GET /{shortCode} (performs 302/301 redirection).\n- Storage DB schema tracking {short_code (PK), original_url, created_at, expiration}.\n- Using Redis or Memcached to cache hot keys.\n- Base62 encoding for length-7 short codes (62^7 = 3.5 Trillion unique codes).",
+      "expectedOutcomes": [
+        "Detail Base62 or hashing collision resolution.",
+        "Provide concrete QPS or storage volume estimations.",
+        "Suggest key separation techniques like KGS (Key Generation Service).",
+        "Explain caching hot entries with TTL (Redis/Memcached)."
+      ],
+      "keywords": [
+        "Base62",
+        "KGS",
+        "collision",
+        "QPS",
+        "302 redirection",
+        "NoSQL",
+        "Redis cache"
+      ]
+    },
+    {
+      "id": "valid-parentheses",
+      "title": "Valid Parentheses Checker",
+      "category": "Algorithms",
+      "type": "coding",
+      "difficulty": "Easy",
+      "description": "Given a string `s` containing just the characters `'('`, `')'`, `'{'`, `'}'`, `'['` and `']'`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.\n\n### Example:\n* Input: `s = \"()[]{}\"` -> Output: `true`\n* Input: `s = \"(]\"` -> Output: `false`\n* Input: `s = \"([])\"` -> Output: `true`",
+      "initialCode": "function isValidParentheses(s: string): boolean {\n  // Your code here\n  \n}\n",
+      "solutionTemplate": "function isValidParentheses(s: string): boolean {\n  const stack: string[] = [];\n  const map: { [key: string]: string } = {\n    ')': '(',\n    '}': '{',\n    ']': '['\n  };\n  \n  for (let i = 0; i < s.length; i++) {\n    const char = s[i];\n    if (char === '(' || char === '{' || char === '[') {\n      stack.push(char);\n    } else if (char === ')' || char === '}' || char === ']') {\n      if (stack.length === 0 || stack.pop() !== map[char]) {\n        return false;\n      }\n    }\n  }\n  \n  return stack.length === 0;\n}",
+      "expectedOutcomes": [
+        "Use a stack data structure to track brackets.",
+        "Map opening and closing pairs correctly.",
+        "Check string lengths and empty cases elegantly.",
+        "Return false if stack is non-empty at the end of evaluation."
+      ],
+      "keywords": [
+        "stack",
+        "push",
+        "pop",
+        "matching pairs",
+        "empty stack",
+        "O(N) time complexity"
+      ]
+    },
+    {
+      "id": "database-sql-nosql",
+      "title": "SQL vs NoSQL Database Tradeoffs",
+      "category": "Databases",
+      "type": "conceptual",
+      "difficulty": "Medium",
+      "description": "Explain the fundamental differences, strengths, and standard use-cases of relational (SQL) versus non-relational (NoSQL) databases.\n\n### Key Points to Cover:\n1. **Data Model**: Schemas (rigid/structured vs flexible/schemaless), data formats (tables vs key-value, document, column-family, graph).\n2. **Scaling**: Horizontal scaling vs vertical scaling.\n3. **Transaction Guarantees**: ACID characteristics in SQL databases vs BASE (Basically Available, Soft State, Eventual Consistency) model in NoSQL.\n4. **Joins & Relations**: How relationships are resolved (JOIN queries vs nested/denormalized collections).",
+      "solutionTemplate": "A comprehensive answer outlines:\n1. SQL uses structured schemas, supporting SQL joins, foreign key constraints, and 100% ACID compliance (essential for payroll, ledgers). Vertical scaling is typical.\n2. NoSQL is schemaless (document, key-value, column-oriented), easily partitioning keys across clusters to support massive horizontal scaling.\n3. CAP Theorem explains eventual consistency sacrifices in NoSQL.",
+      "expectedOutcomes": [
+        "Clearly compare vertical (SQL) and horizontal (NoSQL) scaling mechanisms.",
+        "Explain ACID vs BASE transaction profiles.",
+        "Specify valid domain use-cases for both types (e.g., Financial ledger for SQL, User session for NoSQL)."
+      ],
+      "keywords": [
+        "ACID",
+        "BASE",
+        "Horizontal scaling",
+        "Vertical scaling",
+        "CAP theorem",
+        "denormalization",
+        "joins"
+      ]
+    },
+    {
+      "id": "js-debounce",
+      "title": "Implement Debounce Function with Immediate Flag",
+      "category": "Algorithms",
+      "type": "coding",
+      "difficulty": "Medium",
+      "description": "Implement a classic `debounce` utility function.\n\nDebouncing ensures that a function is not called again until a specified amount of idle time has passed since its last call. \n\n### Requirements:\n1. The return value should be a function that schedules execution of the target function `fn` after `delay` milliseconds.\n2. If the debounced function is invoked repeatedly, reset the timer on each invocation.\n3. Support an optional `immediate` boolean parameter. If `immediate` is `true`, invoke the function immediately on the leading edge instead of the trailing edge of the timeout. Subsequent rapid calls should be throttled until the delay window expires.\n4. Correctly preserve the `this` context and arguments of the function invocation.",
+      "initialCode": "export function debounce<T extends (...args: any[]) => any>(\n  fn: T, \n  delay: number, \n  immediate = false\n): (...args: Parameters<T>) => void {\n  // Your code here\n  \n}\n",
+      "solutionTemplate": "export function debounce<T extends (...args: any[]) => any>(\n  fn: T, \n  delay: number, \n  immediate = false\n): (...args: Parameters<T>) => void {\n  let timeout: NodeJS.Timeout | null = null;\n  \n  return function(this: any, ...args: Parameters<T>) {\n    const context = this;\n    \n    const callNow = immediate && !timeout;\n    \n    if (timeout) {\n      clearTimeout(timeout);\n    }\n    \n    timeout = setTimeout(() => {\n      timeout = null;\n      if (!immediate) {\n        fn.apply(context, args);\n      }\n    }, delay);\n    \n    if (callNow) {\n      fn.apply(context, args);\n    }\n  };\n}",
+      "expectedOutcomes": [
+        "Maintain timeout state using closure variables.",
+        "Clear timeout using clearTimeout on each call.",
+        "Support immediate parameter with immediate execution and cooling window.",
+        "Preserve the correct context (this) and arguments list."
+      ],
+      "keywords": [
+        "clearTimeout",
+        "setTimeout",
+        "context",
+        "apply",
+        "closure",
+        "immediate",
+        "leading edge"
+      ]
+    },
+    {
+      "id": "behavioral-conflict",
+      "title": "Resolving Technical Disagreements",
+      "category": "Behavioral",
+      "type": "conceptual",
+      "difficulty": "Medium",
+      "description": "Describe a situation where you had a significant disagreement with a colleague or stakeholder regarding a technical design, architecture, or coding practice. \n\nHow did you navigate the conversation?\n\n### Requirements:\n1. Explain the context, the two opposing viewpoints, and the technical arguments for each.\n2. Outline the steps you took to build consensus or resolve the conflict constructively.\n3. Detail the final outcome and what you learned from the situation.\n4. Structure your response clearly (using the STAR method if possible).",
+      "solutionTemplate": "An excellent STAR answer should focus on:\n- Situation: The specific product requirement or system component.\n- Task: Defining the disagreement (e.g. monolithic design vs. microservices, SQL vs MongoDB).\n- Action: Evaluating trade-offs through an objective spike, joint exploration, or benchmark rather than emotional argument.\n- Result: Consensual agreement, metrics achieved, and a healthy team relationship.",
+      "expectedOutcomes": [
+        "Structure using the STAR strategy (Situation, Task, Action, Result).",
+        "Demonstrate constructive, ego-free collaboration and compromise.",
+        "Acknowledge objective technical trade-offs.",
+        "Reflect on key takeaways or relationship building."
+      ],
+      "keywords": [
+        "consensus",
+        "compromise",
+        "collaboration",
+        "trade-offs",
+        "STAR framework",
+        "objective metrics"
+      ]
+    },
+    {
+      "id": "healthcare-hipaa",
+      "title": "HIPAA Auditable Patient Data Pipeline",
+      "category": "Pharmacy & Healthcare",
+      "type": "conceptual",
+      "difficulty": "Hard",
+      "description": "Design a data intake pipeline for a Pharmacy & Patient Management system that complies with US HIPAA regulations.\n\nYour architect solution must state how you handle Electronic Protected Health Information (ePHI). Specifically, explain:\n1. **Access Controls & Identity**: How to implement Role-Based Access Control (RBAC) so only authorized pharmacists, doctors, and system administrators can view specific patient records.\n2. **Encryption & Security**: How to secure data at rest (e.g., envelope encryption) and in-transit (e.g., TLS 1.3, HTTPS).\n3. **Audit Logging & Tamper-Prevention**: How to record all read, update, and deletion of patient data in an unalterable, cryptographically signed audit log.\n4. **De-identification & Masking**: How to mask or remove HIPAA Safe Harbor identifiers (like SSN, detailed names, birth dates) when piping telemetry data to third-party healthcare analytics platforms.",
+      "solutionTemplate": "An outstanding HIPAA design architecture outlines:\n- Enforcing Row-Level Security (RLS) and strict IAM roles based on active care relationships with patients.\n- Using AES-256 with key rotation through KMS to secure personal patient fields (Envelope encryption).\n- Sending access/modification logs into a stream structured like AWS CloudTrail, stored in WORM (Write Once Read Many) buckets or backed by signed blockchain blocks.\n- Applying k-anonymity or standard differential privacy algorithms on analytic pipeline endpoints.",
+      "expectedOutcomes": [
+        "Detail secure storage using Envelope Encryption or AES-256 with key rotation.",
+        "Explain immutable tamper-proof audit trails for ePHI read/write events.",
+        "Describe safe harbor identifiers de-identification methodologies.",
+        "Outline Role-Based Access Control (RBAC) and Row-Level Security (RLS) enforcement."
+      ],
+      "keywords": [
+        "HIPAA",
+        "ePHI",
+        "RBAC",
+        "audit log",
+        "envelope encryption",
+        "de-identification",
+        "WORM storage"
+      ]
+    },
+    {
+      "id": "it-rate-limiter",
+      "title": "Token Bucket Rate Limiter Implementation",
+      "category": "Information & Technology",
+      "type": "coding",
+      "difficulty": "Medium",
+      "description": "Implement an optimized dynamic `TokenBucket` class to manage API rate-limiting in an Information Technology system gateway.\n\nA Token Bucket rate limiter contains a set capacity of tokens. Tokens replenish at a constant fill rate. Every incoming request consumes exactly one token. If the bucket is empty, the request is rejected immediately.\n\n### Requirements:\n1. The class should be initialized with:\n   - `capacity`: Maximum number of tokens the bucket can hold.\n   - `refillRate`: Number of tokens added to the bucket per second.\n2. Implement an asynchronous method `allowRequest(timestamp: number): boolean` that checks if a request is permitted at the given millisecond timestamp, updates the token count lazily (without background timer threads), and returns `true` if allowed, else `false`.",
+      "initialCode": "export class TokenBucket {\n  private capacity: number;\n  private refillRate: number; // tokens per second\n  private lastRefillTimestamp: number;\n  private tokens: number;\n\n  constructor(capacity: number, refillRate: number) {\n    this.capacity = capacity;\n    this.refillRate = refillRate;\n    this.tokens = capacity;\n    this.lastRefillTimestamp = Date.now();\n  }\n\n  public allowRequest(timestamp: number = Date.now()): boolean {\n    // Your code here\n    return false;\n  }\n}\n",
+      "solutionTemplate": "export class TokenBucket {\n  private capacity: number;\n  private refillRate: number; // tokens per second\n  private lastRefillTimestamp: number;\n  private tokens: number;\n\n  constructor(capacity: number, refillRate: number) {\n    this.capacity = capacity;\n    this.refillRate = refillRate;\n    this.tokens = capacity;\n    this.lastRefillTimestamp = Date.now();\n  }\n\n  public allowRequest(timestamp: number = Date.now()): boolean {\n    // Lazy replenish\n    const elapsedSeconds = Math.max(0, (timestamp - this.lastRefillTimestamp) / 1000);\n    const tokensToAdd = elapsedSeconds * this.refillRate;\n    \n    if (tokensToAdd > 0) {\n      this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);\n      this.lastRefillTimestamp = timestamp;\n    }\n\n    if (this.tokens >= 1) {\n      this.tokens -= 1;\n      return true;\n    }\n    \n    return false;\n  }\n}",
+      "expectedOutcomes": [
+        "Calculate tokens lazily based on elapsed duration in seconds or milliseconds.",
+        "Clamp the maximum calculated tokens to not exceed the specified bucket capacity.",
+        "Subtract one token appropriately when request is allowed, returning true.",
+        "Correctly handle non-monotonic clocks or concurrent triggers safely."
+      ],
+      "keywords": [
+        "Token Bucket",
+        "rate limiter",
+        "lazy evaluation",
+        "refill rate",
+        "capacity",
+        "timestamp translation"
+      ]
+    },
+    {
+      "id": "finance-double-entry",
+      "title": "Idempotent Double-Entry Transfer System",
+      "category": "Banking & Finance",
+      "type": "conceptual",
+      "difficulty": "Hard",
+      "description": "Design a highly resilient consensus transfer mechanism for a digital banking system to direct transfers between two internal deposit accounts.\n\nDetail your solutions to resolve the following real-world banking issues:\n1. **Double-Spend & Race Hazards**: How to safely handle two rapid concurrent transfers from Account A (balance $100) to Account B ($50) and Account C ($60) without causing negative overdrafts or inconsistent databases.\n2. **Idempotency**: How to ensure a network timeout retry does not charge/transfer money twice if the initial request completed but the packet was dropped on return.\n3. **Double-Entry Principle**: Explain how you enforce the core accounting equation (Assets = Liabilities + Equity) using credit/debit records so money is never created or destroyed.\n4. **Consistency across Microservices**: How you handle transactions if Account A is in a different database shard or service from Account B (e.g., Sagas, Outbox pattern, or 2PCS/Dual-phase commits).",
+      "solutionTemplate": "A production-ready financial ledger design details:\n- Using Database Transactions with pessimistic locking (SELECT FOR UPDATE) on the ordered lower ledger IDs first to avoid deadlocks.\n- Storing an idempotency key (UUID) on all ledger transactions, checked in a unique constraint table.\n- Every ledger transaction must compose balancing Debits and Credits within a single atomic database statement.\n- Distributing sharding sync via the Saga Pattern (orchestrator vs choreography) or temporal workflow engines with compensating actions if step two fails.",
+      "expectedOutcomes": [
+        "Use lock sequencing (alphabetical or ID order) to prevent deadlocks under race conditions.",
+        "Explain idempotency checkpoints using a unique constraint database table for idempotency keys.",
+        "Define transfer records using balanced debits and credits on account ledgers instead of a simple update statement.",
+        "Incorporate Saga workflows or Two-Phase Commit to coordinate across transaction shards."
+      ],
+      "keywords": [
+        "double-entry",
+        "idempotency key",
+        "SELECT FOR UPDATE",
+        "deadlock prevention",
+        "ledger auditing",
+        "Saga pattern"
+      ]
+    },
+    {
+      "id": "healthcare-ehr-basics",
+      "title": "EHR Access Role-Mapping & Audit Logs",
+      "category": "Pharmacy & Healthcare",
+      "type": "conceptual",
+      "difficulty": "Easy",
+      "description": "Outline the core architectural design for securing Electronic Health Records (EHR) within a clinical environment. Explain who should have read/write access to specialized patient health charts, how you would prevent unauthorized access, and how to verify that your medical personnel conform to strict regulatory security protocols using access logging.",
+      "solutionTemplate": "An outstanding entry-level EHR safety summary should include:\n- Establishing Role-Based Access Control (RBAC) separating Physicians (read/write), Pharmacists (read prescribed, update fill status), and Admins (billing metadata only).\n- Ensuring every query or credential check logs to an immutable access ledger with strict metadata (operator, timestamp, resource ID, action).\n- Enforcing automatic session timeout limits to prevent visual exposure of confidential screens in high-traffic wards.",
+      "expectedOutcomes": [
+        "Mention Role-Based Access Control (RBAC) with specific segregation of clinical roles.",
+        "Explain implementing automated, immutable logs for every patient record read action.",
+        "Identify critical safety protocols, such as session expirations on shared terminals."
+      ],
+      "keywords": [
+        "EHR",
+        "RBAC",
+        "audit log",
+        "clinical access controls",
+        "credential checking"
+      ]
+    },
+    {
+      "id": "healthcare-validate-ndc",
+      "title": "Validate National Drug Code Formats",
+      "category": "Pharmacy & Healthcare",
+      "type": "coding",
+      "difficulty": "Easy",
+      "description": "Implement a function `validateNDC(ndcCode: string): boolean` to determine if a given National Drug Code string complies with standard FDA formats.\n    \nAn FDA National Drug Code (NDC) is a unique 10-digit or 11-digit, 3-segment number. It must follow one of these hyphenated formats:\n- 4-4-2 format: e.g. \"1234-5678-90\" (4 digits, hyphen, 4 digits, hyphen, 2 digits)\n- 5-3-2 format: e.g. \"12345-678-90\"\n- 5-4-1 format: e.g. \"12345-6789-0\"\n- 5-4-2 format (11-digit standard): e.g. \"12345-6789-01\"\n\nYour function must return `true` if the code perfectly matches any of the above formats (all characters besides hyphens must be numeric digits), else return `false`.",
+      "initialCode": "export function validateNDC(ndcCode: string): boolean {\n  // Your code here\n  return false;\n}",
+      "solutionTemplate": "export function validateNDC(ndcCode: string): boolean {\n  const pattern = /^(?:\\d{4}-\\d{4}-\\d{2}|\\d{5}-\\d{3}-\\d{2}|\\d{5}-\\d{4}-\\d{1}|\\d{5}-\\d{4}-\\d{2})$/;\n  return pattern.test(ndcCode);\n}",
+      "expectedOutcomes": [
+        "Utilize a regular expression or segment indexing to parse segments.",
+        "Verify segment lengths match standard FDA permutations (4-4-2, 5-3-2, 5-4-1, 5-4-2).",
+        "Ensure no alphabetic or special characters other than valid hyphens are accepted."
+      ],
+      "keywords": [
+        "NDC",
+        "regular expression",
+        "FDA layout validation",
+        "hyphen segments",
+        "validateNDC"
+      ]
+    },
+    {
+      "id": "healthcare-pill-intervals",
+      "title": "Daily Medication Schedule Generator",
+      "category": "Pharmacy & Healthcare",
+      "type": "coding",
+      "difficulty": "Medium",
+      "description": "Design a scheduler to generate precise daily administration times for a pharmacy prescription dispensing platform.\n\nImplement a function `generatePillSchedule(startTimeISO: string, intervalHours: number, totalDoses: number): string[]` that produces an array of consecutive medication intake times as ISO strings.\n\n### Rules of Administration:\n1. First dose must be taken exactly at `startTimeISO`.\n2. Each subsequent dose must adjust precisely by `intervalHours`.\n3. To protect the patient's sleep quality, no dose should be scheduled between **11:00 PM (23:00)** and **06:00 AM** in the patient's local timezone.\n4. If a dose falls into this sleep gap, it must be automatically shifted forward to exactly **06:00 AM** the following morning, and subsequent doses will calculate from that new adjusted baseline.\n\nUse continuous timing loops or recursions to build standard timezone neutral dates.",
+      "initialCode": "export function generatePillSchedule(startTimeISO: string, intervalHours: number, totalDoses: number): string[] {\n  // Your code here\n  return [];\n}",
+      "solutionTemplate": "export function generatePillSchedule(startTimeISO: string, intervalHours: number, totalDoses: number): string[] {\n  const result: string[] = [];\n  if (totalDoses <= 0) return result;\n  \n  let current = new Date(startTimeISO);\n  \n  for (let i = 0; i < totalDoses; i++) {\n    // Check if current hours are in sleep zone (23:00 to 06:00)\n    let hours = current.getHours();\n    \n    // Check if it falls inside [23:00, 06:00)\n    if (hours >= 23 || hours < 6) {\n      if (hours >= 23) {\n        current.setDate(current.getDate() + 1);\n      }\n      current.setHours(6, 0, 0, 0);\n    }\n    \n    result.push(current.toISOString());\n    // Prep next dose\n    current = new Date(current.getTime() + intervalHours * 60 * 60 * 1000);\n  }\n  return result;\n}",
+      "expectedOutcomes": [
+        "Register medication starting dose at the exact specified starting timestamp.",
+        "Iterate and compute offsets in increments of specified interval hours.",
+        "Verify hour checks for the sleep window from 11:00 PM (23:00) to 6:00 AM.",
+        "Postpone overlapping medication schedules to the next closest safe baseline morning (06:00)."
+      ],
+      "keywords": [
+        "medication scheduler",
+        "sleep window postponement",
+        "time-series loops",
+        "generatePillSchedule",
+        "date shifts"
+      ]
+    },
+    {
+      "id": "healthcare-vaccine-coldchain",
+      "title": "Cold Chain Vaccine Temperature IoT Architecture",
+      "category": "Pharmacy & Healthcare",
+      "type": "conceptual",
+      "difficulty": "Medium",
+      "description": "Explain the system design of an IoT cold-chain telemetry logging network for distributed mRNA vaccines. \n    \nVaccines require constant ultra-low temperatures (between -90°C and -60°C). Any detour above this temperature range renders the entire batch inactive. Address how you would handle:\n1. **Real-time Telemetry Processing**: How IoT sensor beacons on mobile inventory refrigerators can send frequent temp heartbeats.\n2. **Disconnected Operations**: How you handle transient dead zones where shipping trucks lose network signal.\n3. **Smart Alerting Grid**: How to notify distribution staff immediately using sliding event evaluation windows when a violation occurs.",
+      "solutionTemplate": "An outstanding Cold Chain architecture must specify:\n- IoT gateways gathering temperature metrics with client-side buffer flash storage (SQLite/Local logs) to safely persist records during network dropouts, resending buffered backlogs once connection reconnects.\n- Continuous streaming ingestion via Apache Kafka or AWS Kinesis to track telemetry heartbeats.\n- Sliding window timers in Flink/Spark Streaming to track cumulative temperature exposure thresholds (e.g., an alarm fires if temps exceed -60°C for over 5 consecutive minutes).",
+      "expectedOutcomes": [
+        "Detail buffer strategy or offline storage on IoT device units during cellular network blackouts.",
+        "Utilize continuous event stream ingestion technologies like Kafka, MQTT, or Kinesis.",
+        "Explain threshold triggers and alert mechanisms using time-window analysis."
+      ],
+      "keywords": [
+        "cold chain",
+        "telemetry system",
+        "local buffers",
+        "IoT heartbeats",
+        "sensor threshold alerts",
+        "temperature deviation"
+      ]
+    },
+    {
+      "id": "healthcare-contraindication-check",
+      "title": "Drug-Drug Conflict Detection Engine",
+      "category": "Pharmacy & Healthcare",
+      "type": "coding",
+      "difficulty": "Hard",
+      "description": "Implement a lightning-fast clinical safety algorithm to find potential medication conflict groups.\n    \nA pharmacy application wants to cross-examine incoming doctor orders for active patients against a known master list of dangerous drug combinations (contraindications).\n\nImplement a function `findContraindications(activeDrugs: string[], rules: [string, string][]): string[][]` that scans a list of active medications and identifies all conflicting matches.\n\n### Rules:\n1. A rule is a tuple element `[DrugA, DrugB]`. If both `DrugA` and `DrugB` are inside the `activeDrugs` list, they trigger a conflict pair.\n2. The output must be returned as a list of sorted drug pairs, where each pair is sorted alphabetically: e.g., `[[\"DrugA\", \"DrugB\"]]`.\n3. The overall outer list of conflict pairs must also be sorted alphabetically by the first item, then the second item. Avoid returning duplicate conflict reports.",
+      "initialCode": "export function findContraindications(activeDrugs: string[], rules: [string, string][]): string[][] {\n  // Your code here\n  return [];\n}",
+      "solutionTemplate": "export function findContraindications(activeDrugs: string[], rules: [string, string][]): string[][] {\n  const drugSet = new Set(activeDrugs);\n  const foundConflicts: string[][] = [];\n  const seenPairs = new Set<string>();\n\n  for (const [r1, r2] of rules) {\n    if (drugSet.has(r1) && drugSet.has(r2)) {\n      const sortedPair = [r1, r2].sort();\n      const pairKey = sortedPair.join('::');\n      if (!seenPairs.has(pairKey)) {\n        seenPairs.add(pairKey);\n        foundConflicts.push(sortedPair);\n      }\n    }\n  }\n\n  // Sort outer list alphabetically\n  return foundConflicts.sort((a, b) => {\n    if (a[0] !== b[0]) return a[0].localeCompare(b[0]);\n    return a[1].localeCompare(b[1]);\n  });\n}",
+      "expectedOutcomes": [
+        "Convert active drugs list into a Hash Set to perform constant time O(1) membership evaluations.",
+        "Recognize triggering contraindications where both drugs in a rule are active.",
+        "Sort drug parameters within individual results alphabetically.",
+        "Ensure the final returned array has no duplicate conflicts and is ordered alphabetically."
+      ],
+      "keywords": [
+        "drug conflict evaluation",
+        "contraindications",
+        "Hash Set tracking",
+        "deduplication",
+        "alphabetical sorting"
+      ]
+    },
+    {
+      "id": "it-bytes-formatter",
+      "title": "Raw Bytes Human-Readable Converter",
+      "category": "Information & Technology",
+      "type": "coding",
+      "difficulty": "Easy",
+      "description": "Implement an operations utility `formatBytes(bytes: number, decimals?: number): string` that formats raw computer memory storage values into their readable equivalent string (Bytes, KB, MB, GB, TB, PB).\n\n### Rules:\n1. Zero bytes should return exactly `\"0 Bytes\"`.\n2. Decimals defaults to `2` if not explicitly declared in arguments.\n3. The formula evaluates using power indices of base 1024 (1 KB = 1024 Bytes, 1 MB = 1024^2, etc.).\n4. The output must contain the calculated space rate float followed by a space and the appropriate size suffix (e.g., `formatBytes(75390, 1)` should return `\"73.6 KB\"`).",
+      "initialCode": "export function formatBytes(bytes: number, decimals: number = 2): string {\n  // Your code here\n  return \"\";\n}",
+      "solutionTemplate": "export function formatBytes(bytes: number, decimals: number = 2): string {\n  if (bytes === 0) return '0 Bytes';\n  const k = 1024;\n  const dm = decimals < 0 ? 0 : decimals;\n  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];\n  \n  const i = Math.floor(Math.log(bytes) / Math.log(k));\n  const calc = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));\n  return calc + ' ' + sizes[i];\n}",
+      "expectedOutcomes": [
+        "Perform calculation using logarithmic powers of scale base 1024.",
+        "Handle zero edge-cases cleanly by returning exactly \"0 Bytes\".",
+        "Format output float precision according to decimals argument limit.",
+        "Map correctly to memory scale labels (Bytes, KB, MB, GB, etc.)."
+      ],
+      "keywords": [
+        "formatBytes",
+        "base 1024 translation",
+        "logarithm operations",
+        "file capacity conversion"
+      ]
+    },
+    {
+      "id": "it-cloud-models",
+      "title": "SaaS, PaaS, IaaS & Serverless Responsibilities",
+      "category": "Information & Technology",
+      "type": "conceptual",
+      "difficulty": "Easy",
+      "description": "You are an operations lead at an IT software firm during an architecture review.\nExplain the core functional separations and security responsibility boundaries between:\n1. **Infrastructure as a Service (IaaS)**\n2. **Platform as a Service (PaaS)**\n3. **Software as a Service (SaaS)**\n4. **Function as a Service (FaaS) / Serverless**\n\nDetail specifically who (the cloud provider vs the customer) handles patching the OS kernel, database clustering, application code compliance, and networking protection.",
+      "solutionTemplate": "An outstanding description must specify:\n- IaaS: Vendor provides physical infrastructure & virtualization. Customer is fully responsible for OS updates, network firewall setups, runtime frameworks, and code safety.\n- PaaS: Vendor handles OS updates, database engines, and basic scalability. Customer operates application code configuration and access models.\n- SaaS: Vendor handles everything from physical servers up to user-interface access. Customer configures individual account settings.\n- Serverless (FaaS): Vendor abstracts container setups and idle servers dynamically. Customer simply uploads stateless trigger functions.",
+      "expectedOutcomes": [
+        "Segregate Cloud deployment categories (IaaS, PaaS, SaaS, and FaaS/Serverless).",
+        "Identify distinct layers of responsibility (OS, Networking, Virtualization, and Code).",
+        "Detail the provider versus consumer obligations across models."
+      ],
+      "keywords": [
+        "IaaS",
+        "PaaS",
+        "SaaS",
+        "Serverless",
+        "shared responsibility model",
+        "security boundaries"
+      ]
+    },
+    {
+      "id": "it-deployment-options",
+      "title": "Blue-Green vs Canary vs Rolling Deployments",
+      "category": "Information & Technology",
+      "type": "conceptual",
+      "difficulty": "Medium",
+      "description": "As a cloud devops architect, compare Blue-Green, Canary, and Rolling software deployment strategies.\n    \nDetail:\n1. **Rollback Performance**: How fast can you undo a bug when one is active in a deployment wave?\n2. **Infrastructure Cost**: How do host allocation demands compare between keeping duplicate stacks online?\n3. **Database Migration Sync**: How do you avoid corrupted columns or duplicate inserts if old and new versions of code connect to the same SQL database at the same time?",
+      "solutionTemplate": "A comprehensive answer outlines:\n- Blue-Green: Keeps two identical hardware setups (\"Blue\" running current, \"Green\" running new). Rollback is nearly instant by shifting CDN DNS/load balancer routing back. Double standard cloud resource cost metrics.\n- Canary: Deploys the code update to a tiny percentage of active machines (e.g., 5% traffic). Rollback involves killing canary hosts. Low extra cost profile.\n- Rolling: Sequentially terminates current node clusters and creates new ones. Low cost overhead but rollbacks are slow because of step-by-step image rebuilds task bounds.\n- Database Schema Management: Apply backwards-compatible adjustments (Expand/Contract model). Never drop old schema columns until all previous containers are safely updated.",
+      "expectedOutcomes": [
+        "Define differences between Blue-Green, Canary, and Rolling deployment types.",
+        "Assess financial and computing overhead comparisons.",
+        "Evaluate rollback recovery speeds and fallback parameters.",
+        "Incorporate blue-green database compatibility practices (e.g. backwards-compatible migrations)."
+      ],
+      "keywords": [
+        "Blue-Green",
+        "Canary release",
+        "Rolling update",
+        "rollback rate",
+        "expand-contract database",
+        "zero downtime"
+      ]
+    },
+    {
+      "id": "it-lru-ttl",
+      "title": "LRU Cache with TTL Expiry",
+      "category": "Information & Technology",
+      "type": "coding",
+      "difficulty": "Hard",
+      "description": "Write a high-performance Least Recently Used (LRU) cache class that also enforces individual Time-to-Live (TTL) timestamps on stored keys.\n\nThe cache class `LRUTTLCache` must support three primary methods:\n1. `constructor(capacity: number)`: Initializes a cache with maximum element count.\n2. `get(key: string, timestamp: number): number`: Retrieves value for key if it exists, is not expired, and updates LRU priority list. Returns `-1` if key is missing or expired.\n3. `put(key: string, value: number, ttl: number, timestamp: number): void`: Inserts a key-value pair with a specific millisecond survival duration (`ttl`). If capacity is exceeded, evict the least recently used valid element first. If all elements are expired, invalidate the oldest expired entry.\n\nEnsure your code is optimized and manages stale values correctly.",
+      "initialCode": "export class LRUTTLCache {\n  constructor(capacity: number) {\n    // Your code here\n  }\n\n  get(key: string, timestamp: number): number {\n    // Your code here\n    return -1;\n  }\n\n  put(key: string, value: number, ttl: number, timestamp: number): void {\n    // Your code here\n  }\n}",
+      "solutionTemplate": "export class LRUTTLCache {\n  private capacity: number;\n  private cache = new Map<string, { value: number; expireAt: number; lastUsed: number }>();\n\n  constructor(capacity: number) {\n    this.capacity = capacity;\n  }\n\n  get(key: string, timestamp: number): number {\n    const item = this.cache.get(key);\n    if (!item) return -1;\n    \n    if (timestamp >= item.expireAt) {\n      this.cache.delete(key);\n      return -1;\n    }\n    \n    // Update LRU access metrics\n    item.lastUsed = timestamp;\n    return item.value;\n  }\n\n  put(key: string, value: number, ttl: number, timestamp: number): void {\n    // Clean up expired items first to free space safely\n    for (const [k, item] of this.cache.entries()) {\n      if (timestamp >= item.expireAt) {\n        this.cache.delete(k);\n      }\n    }\n\n    if (this.cache.has(key)) {\n      this.cache.set(key, { value, expireAt: timestamp + ttl, lastUsed: timestamp });\n      return;\n    }\n\n    if (this.cache.size >= this.capacity) {\n      // Find LRU element based on lastUsed\n      let lruKey: string | null = null;\n      let oldestUsedTime = Infinity;\n      \n      for (const [k, item] of this.cache.entries()) {\n        if (item.lastUsed < oldestUsedTime) {\n          oldestUsedTime = item.lastUsed;\n          lruKey = k;\n        }\n      }\n      \n      if (lruKey) {\n        this.cache.delete(lruKey);\n      }\n    }\n\n    this.cache.set(key, { value, expireAt: timestamp + ttl, lastUsed: timestamp });\n  }\n}",
+      "expectedOutcomes": [
+        "Validate time-to-live expirations accurately against incoming timestamp comparisons.",
+        "Correctly update eviction structures with LRU priorities during lookups.",
+        "Deduct expired entities cleanly from the stored Map layout.",
+        "Handle capacity constraints perfectly using lowest-used checks on item structures."
+      ],
+      "keywords": [
+        "LRUTTLCache",
+        "LRU eviction",
+        "stale key clean-up",
+        "TTL expiration checking",
+        "Map operations"
+      ]
+    },
+    {
+      "id": "it-service-mesh",
+      "title": "Service Mesh Deployment and mTLS",
+      "category": "Information & Technology",
+      "type": "conceptual",
+      "difficulty": "Hard",
+      "description": "Explain the architectural design and operations trade-offs of deploying a Service Mesh (like Istio/Linkerd with Envoy sidecars) across a microservice application landscape.\n    \nAnalyze:\n1. **Sidecar Proxying Pattern**: How sidecar containers intercept incoming/outgoing system traffic.\n2. **Mutual TLS (mTLS)**: How peer identity is validated dynamically between microservices.\n3. **Latency & CPU Overhead**: The trade-offs of doing three network hops for a single logical microservice request.\n4. **Alternative Architectures**: How this compares to using application-level gateway SDK libraries instead.",
+      "solutionTemplate": "An outstanding Service Mesh analysis highlights:\n- Sidecar Pattern: Sidecar containers like Envoy are injected next to app containers, redirecting firewall IPTables rule mappings to process all protocol requests.\n- mTLS: Sidecars request certificate bundles from a local authority (Citadel/SPIFFE), completing bilateral TLS handshakes before decoding HTTP parameters.\n- Infrastructure Costing: Added networking buffer delays, plus a major memory/CPU cost footprint due to running hundreds of localized proxy daemons on the cluster virtual nodes.",
+      "expectedOutcomes": [
+        "Detail mTLS cryptography handshakes using SPIFFE/SPIRE dynamic container identities.",
+        "Explain IPTables redirection intercept configurations within the sidecar container.",
+        "Contrast CPU/Memory cost overhead metrics of decentralized proxies vs API gateways."
+      ],
+      "keywords": [
+        "Service Mesh",
+        "mTLS",
+        "Envoy proxy",
+        "sidecar injection",
+        "network multiplexing",
+        "SPIFFE identification"
+      ]
+    },
+    {
+      "id": "finance-interest-calc",
+      "title": "Dynamic Compound Interest Calculator",
+      "category": "Banking & Finance",
+      "type": "coding",
+      "difficulty": "Easy",
+      "description": "Implement an interest calculator function `calculateAPYValues(principal: number, annualRate: number, compoundingPeriods: number, years: number): number` to evaluate continuous growth equations.\n    \n### Equation:\n`A = P * (1 + r / n) ^ (n * t)`\n\nWhere:\n- `P` = principal balance (opening deposit value)\n- `r` = annual nominal interest rate as a float (e.g. 5% value parameter is entered as `0.05`)\n- `n` = compounding periods per year (e.g., monthly compound implies `12`, quarterly implies `4`)\n- `t` = period count mapped in years\n\nRound the final floating point output precisely to two fractional places (representing standard cent denominations).",
+      "initialCode": "export function calculateAPYValues(principal: number, annualRate: number, compoundingPeriods: number, years: number): number {\n  // Your code here\n  return 0;\n}",
+      "solutionTemplate": "export function calculateAPYValues(principal: number, annualRate: number, compoundingPeriods: number, years: number): number {\n  if (principal < 0 || annualRate < 0 || compoundingPeriods <= 0 || years < 0) return 0;\n  const growth = Math.pow(1 + annualRate / compoundingPeriods, compoundingPeriods * years);\n  const total = principal * growth;\n  return Math.round(total * 100) / 100;\n}",
+      "expectedOutcomes": [
+        "Incorporate exponent calculations mapped to standard economic compound frequency formula.",
+        "Properly map compound fractions like rate divided by period parameter.",
+        "Format output float parameters precisely to two decimal rounding points."
+      ],
+      "keywords": [
+        "APY calculation",
+        "compound interest",
+        "Math.pow growth",
+        "currency rounding mechanics"
+      ]
+    },
+    {
+      "id": "finance-kyc-aml",
+      "title": "KYC & BSA Compliance Onboarding Design",
+      "category": "Banking & Finance",
+      "type": "conceptual",
+      "difficulty": "Easy",
+      "description": "Explain the fundamental steps of designing a regulatory-compliant digital Know Your Customer (KYC) identity checking system for a retail banking platform in compliance with the Bank Secrecy Act (BSA) rules.\n    \nYour design description must detail:\n1. **User Identity Verification**: What customer credentials must you collect and how do you confirm their authenticity via external state directories (such as credit agencies or govt records)?\n2. **Sanctions List Checking**: How you match user names against regulatory watchlists (like OFAC) without raising high false-positives database blocks.\n3. **Risk Scoring Engine**: How you categorize users into Low, Medium, and High risk profiles.",
+      "solutionTemplate": "An outstanding KYC onboarding analysis specifies:\n- Document collection (SSN/Govt IDs) with optical character recognition (OCR) paired with biometric face-matching algorithms showing active movement.\n- Match querying on OFAC/Sanctions indices using Levenshtein distance string similarity calculations, utilizing manual compliance officer check queues to resolve grey zone matches.\n- Dynamic scoring based on residence country, expected transfer frequency, business entities structure, and initial deposit volume.",
+      "expectedOutcomes": [
+        "Mention OFAC watchlists checks using fuzzy matching software logic.",
+        "Explain AML risk categorizations (Low, Medium, High risk tiers).",
+        "Detail identity and identity documents verifying techniques (biometrics, govt databases)."
+      ],
+      "keywords": [
+        "KYC onboarding",
+        "AML watchlists",
+        "OFAC check",
+        "BSA compliance",
+        "risk profiling",
+        "Levenshtein distance"
+      ]
+    },
+    {
+      "id": "finance-order-matcher",
+      "title": "Order Book Matching Engine",
+      "category": "Banking & Finance",
+      "type": "coding",
+      "difficulty": "Medium",
+      "description": "Implement a trade order book matching engine.\n    \nIn a digital brokerage, stock transactions run through an order book where Buy (Bid) and Sell (Ask) orders are matching based on price-time priority.\n\nImplement a class `OrderMatcher`:\n1. `addOrder(id: string, side: 'buy' | 'sell', price: number, quantity: number): number`: Adds a limit order to the book and attempts to match with opposing orders.\n   - Buy order matches if there is a Sell order at a price <= buy price.\n   - Sell order matches if there is a Buy order at a price >= sell price.\n   - Orders match against the best available price first (lowest sell price for buyers, highest buy price for sellers). If same price, oldest matched first.\n   - Subtract fulfilled quantities. Returns the total quantity matched (sum of filled volumes) during this addition. Stored remaining unmatched share blocks in order memory queue.",
+      "initialCode": "export interface LimitOrder {\n  id: string;\n  side: 'buy' | 'sell';\n  price: number;\n  qty: number;\n  timestamp: number;\n}\n\nexport class OrderMatcher {\n  private buyBook: LimitOrder[] = [];\n  private sellBook: LimitOrder[] = [];\n  private counter: number = 0;\n\n  public addOrder(id: string, side: 'buy' | 'sell', price: number, quantity: number): number {\n    // Your code here\n    return 0;\n  }\n}",
+      "solutionTemplate": "export interface LimitOrder {\n  id: string;\n  side: 'buy' | 'sell';\n  price: number;\n  qty: number;\n  timestamp: number;\n}\n\nexport class OrderMatcher {\n  private buyBook: LimitOrder[] = [];\n  private sellBook: LimitOrder[] = [];\n  private counter: number = 0;\n\n  public addOrder(id: string, side: 'buy' | 'sell', price: number, qty: number): number {\n    this.counter++;\n    const newOrder: LimitOrder = { id, side, price, qty, timestamp: this.counter };\n    let totalFilled = 0;\n\n    if (side === 'buy') {\n      this.sellBook.sort((a, b) => a.price - b.price || a.timestamp - b.timestamp);\n      \n      for (const sellObj of this.sellBook) {\n        if (newOrder.qty <= 0) break;\n        if (sellObj.price <= newOrder.price && sellObj.qty > 0) {\n          const matchQty = Math.min(newOrder.qty, sellObj.qty);\n          newOrder.qty -= matchQty;\n          sellObj.qty -= matchQty;\n          totalFilled += matchQty;\n        }\n      }\n      \n      this.sellBook = this.sellBook.filter(s => s.qty > 0);\n      \n      if (newOrder.qty > 0) {\n        this.buyBook.push(newOrder);\n      }\n    } else {\n      this.buyBook.sort((a, b) => b.price - a.price || a.timestamp - b.timestamp);\n      \n      for (const buyObj of this.buyBook) {\n        if (newOrder.qty <= 0) break;\n        if (buyObj.price >= newOrder.price && buyObj.qty > 0) {\n          const matchQty = Math.min(newOrder.qty, buyObj.qty);\n          newOrder.qty -= matchQty;\n          buyObj.qty -= matchQty;\n          totalFilled += matchQty;\n        }\n      }\n      \n      this.buyBook = this.buyBook.filter(b => b.qty > 0);\n      \n      if (newOrder.qty > 0) {\n        this.sellBook.push(newOrder);\n      }\n    }\n\n    return totalFilled;\n  }\n}",
+      "expectedOutcomes": [
+        "Prioritize trade matches based on lowest bid ask thresholds (price-time constraints).",
+        "Track order execution volumes by subtracting matching volume from order quantities.",
+        "Deduct fully matching transactions out of the buy and sell queue.",
+        "Append leftover stock volumes to the correct purchase or sales queue."
+      ],
+      "keywords": [
+        "matching engine",
+        "order book sorting",
+        "bid ask prioritize",
+        "limit order execution",
+        "volume match math"
+      ]
+    },
+    {
+      "id": "finance-aml-patterns",
+      "title": "Structuring & AML Detection Algorithms",
+      "category": "Banking & Finance",
+      "type": "conceptual",
+      "difficulty": "Medium",
+      "description": "Explain how transactional compliance systems flag \"structuring\" (also known as smurfing) in daily banking channels.\n    \nRegulations require banks to file a Currency Transaction Report (CTR) for physical deposits over $10,000. Bad actors try to bypass this by making multiple smaller deposits (e.g. $9,500, $9,800) across consecutive hours or multiple branch locations. \n\nDescribe:\n1. **Detection Window**: What timeframe analysis algorithms are required to aggregate multiple deposits?\n2. **False-Positive Management**: How to distinguish a payroll run or grocery business cash deposit from true laundering structuring.\n3. **Data Pipelines**: How to digest high transaction volumes real-time using sliding windows.",
+      "solutionTemplate": "An outstanding AML structural design architecture highlights:\n- Operating a moving aggregate timeframe (typically rolling 24 to 72 hours) tracking individual Social Security Numbers, business TAX IDs, or related device logs.\n- Filtering with behavioral baseline metrics — comparing historic deposit patterns (e.g., normal business deposits see constant patterns over 12 months vs. an sudden spike in low-frequency accounts).\n- Leveraging stream aggregation systems running sliding time-windows, evaluating risk weights before triggering Suspicious Activity Reports (SARs).",
+      "expectedOutcomes": [
+        "Define transactional structuring rules (deposits under reporting thresholds like $10,000).",
+        "Incorporate sliding windows (such as a rolling 24-72 hour window) to catch related deposits.",
+        "Differentiate true laundering behavior from normal high-frequency business patterns using anomalies baseline check variables."
+      ],
+      "keywords": [
+        "structuring",
+        "AML rules",
+        "currency transaction report",
+        "sliding transaction windows",
+        "behavioral baselines"
+      ]
+    },
+    {
+      "id": "finance-max-drawdown",
+      "title": "Portfolio Maximum Drawdown Analyzer",
+      "category": "Banking & Finance",
+      "type": "coding",
+      "difficulty": "Hard",
+      "description": "Implement a performance metric algorithm `calculateMaxDrawdown(prices: number[]): number` to find the maximum peak-to-trough drop of historical stock portfolio valuations.\n\nThe maximum drawdown (MDD) is the largest percentage drop of the portfolio value from any historical peak. The formula is evaluated as:\n`Drawdown = (TroughValue - PeakValue) / PeakValue` (represented as a fraction).\n\n### Requirements:\n1. Return the maximum drawdown as a positive fractional value (e.g., if value drops from 100 to 70 and that is the largest drop, return `0.30` representing a 30% drop).\n2. If prices never descend, return `0`.\n3. Your algorithm must execute in O(N) time complexity and O(1) auxiliary space complexity. Single loops are highly preferred.",
+      "initialCode": "export function calculateMaxDrawdown(prices: number[]): number {\n  // Your code here\n  return 0;\n}",
+      "solutionTemplate": "export function calculateMaxDrawdown(prices: number[]): number {\n  if (prices.length <= 1) return 0;\n  \n  let maxPeak = prices[0];\n  let maxDD = 0;\n  \n  for (let i = 1; i < prices.length; i++) {\n    const currentPrice = prices[i];\n    if (currentPrice > maxPeak) {\n      maxPeak = currentPrice;\n    } else {\n      const dropFraction = (maxPeak - currentPrice) / maxPeak;\n      if (dropFraction > maxDD) {\n        maxDD = dropFraction;\n      }\n    }\n  }\n  \n  return parseFloat(maxDD.toFixed(4));\n}",
+      "expectedOutcomes": [
+        "Implement single-pass O(N) evaluation scanning to record moving historical peak elements.",
+        "Calculate percentage drawdown fraction from peak boundaries on dynamic drops.",
+        "Enforce strict O(1) auxiliary space memory restrictions.",
+        "Handle zero-drop price trajectories properly by returning 0."
+      ],
+      "keywords": [
+        "maximum drawdown",
+        "O(N) single pass",
+        "peak tracking",
+        "investment analysis scaling",
+        "calculateMaxDrawdown"
+      ]
+    },
+    {
+      "id": "finance-hft-latency",
+      "title": "High-Frequency Trading Network Latency Design",
+      "category": "Banking & Finance",
+      "type": "conceptual",
+      "difficulty": "Hard",
+      "description": "Describe the engineering design of a high-frequency trading (HFT) infrastructure demanding sub-microsecond latency.\n    \nDetail:\n1. **Network protocol and OSI stack bypassing**: Standard TCP congestion vs UDP multi-casting with custom reliability protocols.\n2. **OS kernel kernel-bypass techniques**: Explain DPDK (Data Plane Development Kit) or Solarflare OpenOnload.\n3. **Hardware Acceleration**: Role of field-programmable gate arrays (FPGAs) in translating market data formats.\n4. **Co-location**: Placing computational server arrays physical meters away from exchange matching servers.",
+      "solutionTemplate": "A stellar HFT infrastructure analysis details:\n- Co-location: Installing order execution server clusters physically within the exchange datacenter cage, reducing light speed fiber propagation transit delay down to single-digit nanoseconds.\n- Kernel Bypass: Utilizing DPDK/Solarflare OpenOnload cards to forward packet buffers directly into RAM user memory spaces, skipping kernel interrupt contexts and CPU contexts switching.\n- Hardware Processing: Program buy/sell checks directly on FPGA silicon wafers to execute order routing within 50 to 100 nanoseconds, bypassing traditional CPU compiler/execution lanes.",
+      "expectedOutcomes": [
+        "Detail physical fiber co-location tactics within the exchange data warehouse.",
+        "Explain kernel bypass mechanics to jump network packets directly into user CPU space.",
+        "Outline FPGA hardware layouts to process exchange feeds in nanoseconds."
+      ],
+      "keywords": [
+        "HFT acceleration",
+        "kernel bypass",
+        "FPGA trade engine",
+        "DPDK network",
+        "co-location latency"
+      ]
+    }
+  ],
+  "submissions": [],
+  "users": [
+    {
+      "id": "usr_admin_paul",
+      "email": "paul15-60932@diu.edu.bd",
+      "name": "Paul Samudra (Admin)",
+      "passwordHash": "h_-m0kf9k",
+      "registeredAt": "2026-06-19T19:47:17.667Z"
+    }
+  ],
+  "feedbacks": [],
+  "activityLogs": [
+    {
+      "id": "log_eth82rapy",
+      "userId": "usr_admin_paul",
+      "userEmail": "paul15-60932@diu.edu.bd",
+      "userName": "Paul Samudra (Admin)",
+      "action": "Admin Login",
+      "timestamp": "2026-06-19T19:47:17.667Z",
+      "details": "Administrator authenticated with master credentials."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "MockMind",
+  "description": "An AI-powered interview preparation platform where candidates practice programming, system design, databases, and behavioral questions with automated evaluations, real-time analytics, and personalized feedback powered by Gemini. Train Your Mind. Ace Your Interview.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
